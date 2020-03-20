@@ -108,7 +108,9 @@ namespace waTracking.Web.Controllers
             _context.TrackerLogs.Add(trackerLog);
             try
             {
-                await _context.SaveChangesAsync();
+                 await _context.SaveChangesAsync();
+                Int64 id = trackerLog.Id;
+
             }
             catch (Exception ex)
             {
@@ -116,7 +118,7 @@ namespace waTracking.Web.Controllers
                 return BadRequest();
             }
 
-            return Ok();
+            return Ok(trackerLog);
         }
 
         // DELETE: api/TrackerLogs/5
