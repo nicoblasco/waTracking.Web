@@ -9,7 +9,7 @@ namespace waTracking.Entities.Security
     {
         public int Id { get; set; }
         [Required]
-        public int SecurityRolId { get; set; }
+        public int SecurityRoleId { get; set; }
         [Required]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "El nombre no debe de tener más de 100 caracteres, ni menos de 3 caracteres.")]
         public string Nombre { get; set; }

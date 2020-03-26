@@ -16,6 +16,6 @@ namespace waTracking.Entities.Security
         public string Descripcion { get; set; }
         public bool Condicion { get; set; }
 
-        public ICollection<SecurityRole> usuarios { get; set; }
+        public ICollection<SecurityUser> Usuarios { get; set; }
     }
 }

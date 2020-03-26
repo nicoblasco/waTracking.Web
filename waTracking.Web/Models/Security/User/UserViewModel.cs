@@ -9,7 +9,7 @@ namespace waTracking.Web.Models.Security.User
     {
         public int Id { get; set; }
 
-        public int SecurityRolId { get; set; }
+        public int SecurityRoleId { get; set; }
 
         public string Rol { get; set; }
         public string Nombre { get; set; }

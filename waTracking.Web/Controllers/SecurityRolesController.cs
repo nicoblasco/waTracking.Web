@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using waTracking.Web.Models.Security.Role;
 
 namespace waTracking.Web.Controllers
 {
+    [EnableCors("SiteCorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class SecurityRolesController : ControllerBase
@@ -39,7 +41,7 @@ namespace waTracking.Web.Controllers
         }
 
 
-        // GET: api/Roles/Select
+        // GET: api/SecurityRoles/Select
         [HttpGet("[action]")]
         public async Task<IEnumerable<GetRolViewModel>> Select()
         {

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,7 @@ using waTracking.Web.Models.Security.User;
 
 namespace waTracking.Web.Controllers
 {
+    [EnableCors("SiteCorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class SecurityUsersController : ControllerBase
@@ -38,7 +41,7 @@ namespace waTracking.Web.Controllers
             return usuario.Select(x => new UserViewModel
             {
                 Id = x.Id,
-                SecurityRolId = x.SecurityRolId,
+                SecurityRoleId = x.SecurityRoleId,
                 Rol = x.Rol.Nombre,
                 Nombre = x.Nombre,
                 Condicion = x.Condicion,
@@ -53,7 +56,7 @@ namespace waTracking.Web.Controllers
             });
         }
 
-        // POST: api/Usuarios/Crear
+        // POST: api/SecurityUsers/Crear
         [HttpPost("[action]")]
         public async Task<ActionResult> Crear([FromBody] CreateUserViewModel model)
         {
@@ -73,7 +76,7 @@ namespace waTracking.Web.Controllers
 
             SecurityUser usuario = new SecurityUser
             {
-                SecurityRolId = model.SecurityRoleId,
+                SecurityRoleId = model.SecurityRoleId,
                 Nombre = model.Nombre,
                 Tipo_documento = model.Tipo_documento,
                 Num_documento = model.Num_documento,
@@ -101,7 +104,7 @@ namespace waTracking.Web.Controllers
         }
 
 
-        // PUT: api/Articulos/Actualizar/5
+        // PUT: api/SecurityUsers/Actualizar/5
         [HttpPut("[action]")]
         public async Task<IActionResult> Actualizar([FromBody] UpdateUserViewModel model)
         {
@@ -118,7 +121,7 @@ namespace waTracking.Web.Controllers
 
             var usuario = await _context.SecurityUsers.FirstOrDefaultAsync(x => x.Id == model.Id);
 
-            usuario.SecurityRolId = model.SecurityRoleId;
+            usuario.SecurityRoleId = model.SecurityRoleId;
             usuario.Nombre = model.Nombre;
             usuario.Tipo_documento = model.Tipo_documento;
             usuario.Num_documento = model.Num_documento;
@@ -165,7 +168,7 @@ namespace waTracking.Web.Controllers
 
         }
 
-        // PUT: api/Articulos/Desactivar/5
+        // PUT: api/SecurityUsers/Desactivar/5
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> Desactivar([FromRoute] int id)
         {
@@ -201,7 +204,7 @@ namespace waTracking.Web.Controllers
         }
 
 
-        // PUT: api/Articulos/Activar/5
+        // PUT: api/SecurityUsers/Activar/5
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> Activar([FromRoute] int id)
         {
@@ -237,7 +240,8 @@ namespace waTracking.Web.Controllers
         }
 
 
-        // PUT: api/Articulos/Login
+        // PUT: api/SecurityUsers/Login
+        //[AllowAnonymous]
         [HttpPost("[action]")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -249,7 +253,7 @@ namespace waTracking.Web.Controllers
                 return NotFound();
             }
 
-            if (VerificarPasswordHash(model.Password, usuario.Password_hash, usuario.Password_salt))
+            if (!VerificarPasswordHash(model.Password, usuario.Password_hash, usuario.Password_salt))
             {
                 return NotFound();
 
@@ -261,8 +265,8 @@ namespace waTracking.Web.Controllers
                 new Claim(ClaimTypes.Email,email),
                 new Claim(ClaimTypes.Role,usuario.Rol.Nombre),
                 new Claim("Id", usuario.Id.ToString()),
-                new Claim("Rol",email),
-                new Claim("Nombre",usuario.Rol.Nombre)
+                new Claim("Rol",usuario.Rol.Nombre),
+                new Claim("Nombre",usuario.Nombre)
             };
 
             return Ok(
@@ -285,7 +289,8 @@ namespace waTracking.Web.Controllers
         private string GenerarToken(List<Claim> claims)
         {
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt.Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Clave personalizada"));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
