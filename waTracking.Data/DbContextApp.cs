@@ -6,10 +6,12 @@ using waTracking.Data.Mapping.Georeference;
 using waTracking.Data.Mapping.GeoTracker;
 using waTracking.Data.Mapping.Security;
 using waTracking.Data.Mapping.TrackerLog;
+using waTracking.Data.Mapping.Vehicke;
 using waTracking.Entities.Georeference;
 using waTracking.Entities.GeoTracker;
 using waTracking.Entities.Security;
 using waTracking.Entities.TrackerLog;
+using waTracking.Entities.Vehicle;
 
 namespace waTracking.Data
 {
@@ -20,6 +22,7 @@ namespace waTracking.Data
         public DbSet<Georeference> Georeferences { get; set; }
         public DbSet<SecurityUser> SecurityUsers { get; set; }
         public DbSet<SecurityRole> SecurityRoles { get; set; }
+        public DbSet<VehicleBrand> VehicleBrands { get; set; }
 
         public DbContextApp(DbContextOptions<DbContextApp> options) : base(options)
         {
@@ -35,6 +38,7 @@ namespace waTracking.Data
             modelBuilder.ApplyConfiguration(new GeoTrackerMap());
             modelBuilder.ApplyConfiguration(new SecurityRoleMap());
             modelBuilder.ApplyConfiguration(new SecurityUserMap());
+            modelBuilder.ApplyConfiguration(new VehicleBrandMap());
 
         }
     }

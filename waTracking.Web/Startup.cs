@@ -36,10 +36,26 @@ namespace waTracking.Web
 
 
 
-            //services.AddCors(options => {
+            //services.AddCors(options =>
+            //{
             //    options.AddPolicy("Todos",
             //    builder => builder.WithOrigins("*").WithHeaders("*").WithMethods("*"));
             //});
+
+            // ********************
+            // Setup CORS
+            // ********************
+            var corsBuilder = new CorsPolicyBuilder();
+            corsBuilder.AllowAnyHeader();
+            corsBuilder.AllowAnyMethod();
+            corsBuilder.AllowAnyOrigin(); // For anyone access.
+                                          // corsBuilder.WithOrigins("http://localhost:8080/"); // for a specific url. Don't add a forward slash on the end!
+            corsBuilder.AllowCredentials();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("SiteCorsPolicy", corsBuilder.Build());
+            });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -57,20 +73,7 @@ namespace waTracking.Web
                 });
             services.AddMvc();
 
-            // ********************
-            // Setup CORS
-            // ********************
-            var corsBuilder = new CorsPolicyBuilder();
-            corsBuilder.AllowAnyHeader();
-            corsBuilder.AllowAnyMethod();
-            corsBuilder.AllowAnyOrigin(); // For anyone access.
-                                          // corsBuilder.WithOrigins("http://localhost:8080/"); // for a specific url. Don't add a forward slash on the end!
-            corsBuilder.AllowCredentials();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("SiteCorsPolicy", corsBuilder.Build());
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,7 +100,7 @@ namespace waTracking.Web
             {
                 app.UseHsts();
             }
-           // app.UseCors("Todos");
+          //  app.UseCors("Todos");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAuthentication();
