@@ -81,7 +81,6 @@ namespace waTracking.Web.Controllers
 
 
         // PUT: api/VehicleBrands/Update/5
-        [EnableCors("SiteCorsPolicy")]
         [HttpPut("[action]")]
         public async Task<IActionResult> Update([FromBody] UpdateVehicleBrandViewModel model)
         {
@@ -124,17 +123,17 @@ namespace waTracking.Web.Controllers
 
 
         // PUT: api/VehicleBrands/Delete/5
-        [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> Delete ([FromRoute] int Id)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> Delete ([FromBody] DeleteVehicleBrandViewModel model)
         {
 
 
-            if (Id <= 0)
+            if (model.Id <= 0)
             {
                 return BadRequest();
             }
 
-            var brand = await _context.VehicleBrands.FirstOrDefaultAsync(x => x.Id == Id);
+            var brand = await _context.VehicleBrands.FirstOrDefaultAsync(x => x.Id == model.Id);
 
             brand.Enabled =false;
 
