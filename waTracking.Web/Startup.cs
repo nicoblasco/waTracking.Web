@@ -86,7 +86,13 @@ namespace waTracking.Web
             // ********************
             // USE CORS - might not be required.
             // ********************
-            app.UseCors("SiteCorsPolicy");
+            //   app.UseCors("SiteCorsPolicy");
+
+            app.UseCors(builder =>
+                  builder.AllowAnyOrigin()
+                         .AllowAnyMethod()
+                         .AllowAnyHeader()
+                         .AllowCredentials());
 
             if (env.IsDevelopment())
             {
