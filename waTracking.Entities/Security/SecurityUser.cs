@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using waTracking.Entities.Configuration;
 
 namespace waTracking.Entities.Security
 {
@@ -24,6 +25,9 @@ namespace waTracking.Entities.Security
         public byte[] Password_salt { get; set; }
 
         public bool Condicion { get; set; }
+
+        public int CompanyId { get; set; }
+        public virtual Company Company { get; set; }
 
         public SecurityRole Rol { get; set; }
     }

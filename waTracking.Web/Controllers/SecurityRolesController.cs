@@ -33,9 +33,9 @@ namespace waTracking.Web.Controllers
             return rol.Select(x => new RolViewModel
             {
                 Id = x.Id,
-                Nombre = x.Nombre,
-                Descripcion = x.Descripcion,
-                Condicion = x.Condicion
+                Name = x.Name,
+                Description = x.Description,
+                Enabled = x.Enabled
 
             });
         }
@@ -45,12 +45,12 @@ namespace waTracking.Web.Controllers
         [HttpGet("[action]")]
         public async Task<IEnumerable<GetRolViewModel>> Select()
         {
-            var rol = await _context.SecurityRoles.Where(x => x.Condicion == true).ToListAsync();
+            var rol = await _context.SecurityRoles.Where(x => x.Enabled == true).ToListAsync();
 
             return rol.Select(x => new GetRolViewModel
             {
                 Id = x.Id,
-                Nombre = x.Nombre
+                Name = x.Name
             });
         }
 

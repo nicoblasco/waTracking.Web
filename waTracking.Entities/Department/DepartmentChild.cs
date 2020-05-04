@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace waTracking.Web.Models.Security.Role
+namespace waTracking.Entities.Department
 {
-    public class RolViewModel
+    public class DepartmentChild
     {
         public int Id { get; set; }
-        public string Name { get; set; }
         public string Description { get; set; }
+        public int DepartmentId { get; set; }
         public bool Enabled { get; set; }
+
+        public Department Deparment { get; set; }
     }
 }

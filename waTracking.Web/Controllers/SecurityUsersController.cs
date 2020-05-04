@@ -32,6 +32,28 @@ namespace waTracking.Web.Controllers
             _config = config;
 
         }
+
+        // GET: api/SecurityUsers/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get([FromRoute] Int64 id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.SecurityUsers.Where(x => x.Id == id).FirstOrDefaultAsync();
+            //var user = await _context.SecurityUsers.Where(x => x.Id == id).Include(x => x.Company.ConfigScreen).ThenInclude(c=>c.ConfigScreenFields).FirstOrDefaultAsync();
+
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
         // GET: api/SecurityUser/Listar
         [HttpGet("[action]")]
         public async Task<IEnumerable<UserViewModel>> Listar()
@@ -42,7 +64,7 @@ namespace waTracking.Web.Controllers
             {
                 Id = x.Id,
                 SecurityRoleId = x.SecurityRoleId,
-                Rol = x.Rol.Nombre,
+                Rol = x.Rol.Name,
                 Nombre = x.Nombre,
                 Condicion = x.Condicion,
                 Direccion = x.Direccion,
@@ -263,10 +285,14 @@ namespace waTracking.Web.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Email,email),
-                new Claim(ClaimTypes.Role,usuario.Rol.Nombre),
-                new Claim("Id", usuario.Id.ToString()),
-                new Claim("Rol",usuario.Rol.Nombre),
-                new Claim("Nombre",usuario.Nombre)
+                new Claim(ClaimTypes.Role ,usuario.Rol.Name),
+                new Claim(ClaimTypes.Name ,usuario.Nombre),
+               // new Claim(ClaimTypes.UserData ,usuario.CompanyId.ToString()),
+                //new Claim("Id", usuario.Id.ToString()),
+                new Claim("Rol",usuario.SecurityRoleId.ToString()),
+                //new Claim("Nombre",usuario.Nombre),
+                new Claim("CompanyId",usuario.CompanyId.ToString())
+
             };
 
             return Ok(
