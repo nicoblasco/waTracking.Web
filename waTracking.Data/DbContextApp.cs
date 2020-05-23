@@ -8,6 +8,7 @@ using waTracking.Data.Mapping.Georeference;
 using waTracking.Data.Mapping.GeoTracker;
 using waTracking.Data.Mapping.Security;
 using waTracking.Data.Mapping.Service;
+using waTracking.Data.Mapping.System;
 using waTracking.Data.Mapping.TrackerLog;
 using waTracking.Data.Mapping.Vehicke;
 using waTracking.Entities.Configuration;
@@ -16,6 +17,7 @@ using waTracking.Entities.Georeference;
 using waTracking.Entities.GeoTracker;
 using waTracking.Entities.Security;
 using waTracking.Entities.Service;
+using waTracking.Entities.System;
 using waTracking.Entities.TrackerLog;
 using waTracking.Entities.Vehicle;
 
@@ -44,7 +46,13 @@ namespace waTracking.Data
         public DbSet<DepartmentChild> DepartmentChilds { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
-        
+
+        public DbSet<SystemAction> SystemAction { get; set; }
+        public DbSet<SystemRole> SystemRole { get; set; }
+        public DbSet<SystemRoleAction> SystemRoleAction { get; set; }
+        public DbSet<SystemScreen> SystemScreen { get; set; }
+        public DbSet<SystemScreenField> SystemScreenField { get; set; }
+
 
 
 
@@ -78,6 +86,11 @@ namespace waTracking.Data
             modelBuilder.ApplyConfiguration(new VehicleModelMap());
             modelBuilder.ApplyConfiguration(new VehicleSegmentMap());
             modelBuilder.ApplyConfiguration(new VehicleTypeMap());
+            modelBuilder.ApplyConfiguration(new SystemActionMap());
+            modelBuilder.ApplyConfiguration(new SystemRoleMap());
+            modelBuilder.ApplyConfiguration(new SystemRoleActionMap());
+            modelBuilder.ApplyConfiguration(new SystemScreenMap());
+            modelBuilder.ApplyConfiguration(new SystemScreenFieldMap());
 
         }
     }
