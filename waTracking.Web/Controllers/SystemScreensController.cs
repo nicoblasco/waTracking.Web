@@ -154,12 +154,20 @@ namespace waTracking.Web.Controllers
                 else
                 {
                     //Si no es a borrar, el modelo
-                    SystemScreen systemScreen = _context.SystemScreen.Find(item.Id);
+                    //SystemScreen systemScreen = _context.SystemScreen.Find(item.Id);
+
+
                     //Ahora me fijo si lo elimino o lo actualizo
                     if (item.IsRemoved)
+                    {
+                        SystemScreen systemScreen = _context.SystemScreen.Where(x => x.Id == item.Id).Include(x => x.SystemScreenFields).Include(x => x.SystemActions).FirstOrDefault();
                         screensRemove.Add(systemScreen);
+                    }
+                        
                     else
                     {
+
+                        SystemScreen systemScreen = _context.SystemScreen.Find(item.Id);//Es mas rapido
                         systemScreen.Description = item.Description;
                         systemScreen.Enabled = item.Enabled;
                         systemScreen.Entity = item.Entity;
@@ -179,6 +187,14 @@ namespace waTracking.Web.Controllers
             //Actualizo
             _context.SystemScreen.UpdateRange(screensUpdate);
             //Borro
+            //Primero borro las dependencias
+            foreach (var item in screensRemove)
+            {
+                if (item.SystemScreenFields!=null)
+                _context.SystemScreenField.RemoveRange(item.SystemScreenFields);
+                if (item.SystemActions != null)
+                    _context.SystemAction.RemoveRange(item.SystemActions);
+            }
             _context.SystemScreen.RemoveRange(screensRemove);
 
 

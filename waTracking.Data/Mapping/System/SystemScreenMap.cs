@@ -9,7 +9,7 @@ namespace waTracking.Data.Mapping.System
         public void Configure(EntityTypeBuilder<SystemScreen> builder)
         {
             builder.ToTable("SystemScreen")
-            .HasKey(c => c.Id);
+            .HasKey(c => c.Id) ;
 
         }
     }

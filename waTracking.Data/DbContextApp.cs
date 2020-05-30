@@ -52,6 +52,7 @@ namespace waTracking.Data
         public DbSet<SystemRoleAction> SystemRoleAction { get; set; }
         public DbSet<SystemScreen> SystemScreen { get; set; }
         public DbSet<SystemScreenField> SystemScreenField { get; set; }
+        public DbSet<SystemRoleScreen> SystemRoleScreen { get; set; }
 
 
 
@@ -91,6 +92,7 @@ namespace waTracking.Data
             modelBuilder.ApplyConfiguration(new SystemRoleActionMap());
             modelBuilder.ApplyConfiguration(new SystemScreenMap());
             modelBuilder.ApplyConfiguration(new SystemScreenFieldMap());
+            modelBuilder.ApplyConfiguration(new SystemRoleScreenMap());
 
         }
     }

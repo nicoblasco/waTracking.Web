@@ -19,5 +19,6 @@ namespace waTracking.Entities.System
         public string Icon { get; set; }
 
         public ICollection<SystemScreenField> SystemScreenFields { get; set; }
+        public ICollection<SystemAction> SystemActions { get; set; }
     }
 }
