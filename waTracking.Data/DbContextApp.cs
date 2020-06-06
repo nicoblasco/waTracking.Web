@@ -32,6 +32,7 @@ namespace waTracking.Data
         public DbSet<SecurityRole> SecurityRoles { get; set; }
         public DbSet<SecurityAction> SecurityActions { get; set; }
         public DbSet<SecurityRoleAction> SecurityRoleActions { get; set; }
+        public DbSet<SecurityRoleScreen> SecurityRoleScreens { get; set; }
         public DbSet<VehicleBrand> VehicleBrands { get; set; }
         public DbSet<Status> Status { get; set; }
         public DbSet<TypeOfUse> TypeOfUses { get; set; }
@@ -42,6 +43,8 @@ namespace waTracking.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<ConfigScreen> ConfigScreens { get; set; }
         public DbSet<ConfigScreenField> ConfigScreenFields { get; set; }
+        public DbSet<Sector> Sectors { get; set; }
+        public DbSet<CompanySector> CompanySectors { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<DepartmentChild> DepartmentChilds { get; set; }
         public DbSet<Service> Services { get; set; }
@@ -53,7 +56,7 @@ namespace waTracking.Data
         public DbSet<SystemScreen> SystemScreen { get; set; }
         public DbSet<SystemScreenField> SystemScreenField { get; set; }
         public DbSet<SystemRoleScreen> SystemRoleScreen { get; set; }
-
+        public DbSet<LogError> LogErrors { get; set; }
 
 
 
@@ -73,10 +76,13 @@ namespace waTracking.Data
             modelBuilder.ApplyConfiguration(new SecurityUserMap());
             modelBuilder.ApplyConfiguration(new SecurityActionMap());
             modelBuilder.ApplyConfiguration(new SecurityRoleActionMap());
+            modelBuilder.ApplyConfiguration(new SecurityRoleScreenMap());
             modelBuilder.ApplyConfiguration(new VehicleBrandMap());
             modelBuilder.ApplyConfiguration(new CompanyMap());
             modelBuilder.ApplyConfiguration(new ConfigScreenMap());
             modelBuilder.ApplyConfiguration(new ConfigScreenFieldMap());
+            modelBuilder.ApplyConfiguration(new SectorMap());
+            modelBuilder.ApplyConfiguration(new CompanySectorMap());
             modelBuilder.ApplyConfiguration(new DepartmentMap());
             modelBuilder.ApplyConfiguration(new DepartmentChildMap());
             modelBuilder.ApplyConfiguration(new ServiceMap());
@@ -93,6 +99,7 @@ namespace waTracking.Data
             modelBuilder.ApplyConfiguration(new SystemScreenMap());
             modelBuilder.ApplyConfiguration(new SystemScreenFieldMap());
             modelBuilder.ApplyConfiguration(new SystemRoleScreenMap());
+            modelBuilder.ApplyConfiguration(new LogErrorMap());
 
         }
     }

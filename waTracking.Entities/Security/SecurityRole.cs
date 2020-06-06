@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using waTracking.Entities.Configuration;
+using waTracking.Entities.System;
 
 namespace waTracking.Entities.Security
 {
@@ -18,8 +19,12 @@ namespace waTracking.Entities.Security
         public bool Enabled { get; set; }
 
         public int CompanyId { get; set; }
+        public int SystemRoleId { get; set; }
         public virtual Company Company { get; set; }
+        public virtual SystemRole SystemRole { get; set; }
 
         public ICollection<SecurityUser> Usuarios { get; set; }
+        public ICollection<SecurityRoleAction> SecurityRoleActions { get; set; }
+        public ICollection<SecurityRoleScreen> SecurityRoleScreens { get; set; }
     }
 }

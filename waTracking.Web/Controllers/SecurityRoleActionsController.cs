@@ -40,7 +40,7 @@ namespace waTracking.Web.Controllers
             List<RoleActionViewModel> listIndex = new List<RoleActionViewModel>();
 
 
-            var configScreen = await _context.SecurityRoleActions.Where(x => x.SecurityRoleId == roleId).Include(x => x.SecurityAction ).Select(x => new { x.Id, x.SecurityActionId, x.SecurityAction.Code, x.SecurityRoleId, x.SecurityAction.ConfigScreenId }).ToListAsync();
+            var configScreen = await _context.SecurityRoleActions.Where(x => x.SecurityRoleId == roleId).Include(x => x.SecurityAction ).ThenInclude(x=>x.SystemAction).Select(x => new { x.Id, x.SecurityActionId, x.SecurityAction.SystemAction.Code, x.SecurityRoleId, x.SecurityAction.ConfigScreenId }).ToListAsync();
             
             foreach (var item in configScreen.Where(x=>x.ConfigScreenId== screenId) )
             {

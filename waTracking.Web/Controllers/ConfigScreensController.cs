@@ -42,13 +42,13 @@ namespace waTracking.Web.Controllers
             List<IndexScreenFieldViewModel> listIndex = new List<IndexScreenFieldViewModel>();
             
 
-            var configScreen = await _context.ConfigScreens.Where(x => x.CompanyId == id && x.Enabled ==true).Include(x=>x.ConfigScreenFields).Select(x=> new { x.Id, x.Name, x.Entity,  x.ConfigScreenFields }).ToListAsync();
+            var configScreen = await _context.ConfigScreens.Where(x => x.CompanyId == id && x.Enabled ==true).Include(x=>x.ConfigScreenFields).Include(x=>x.SystemScreen).Select(x=> new { x.Id, x.Description, x.SystemScreen.Entity,  x.ConfigScreenFields }).ToListAsync();
            
             foreach (var item in configScreen)
             {
                 IndexScreenFieldViewModel index = new IndexScreenFieldViewModel();
                 index.Id = item.Id;
-                index.Name = item.Name;
+                index.Name = item.Description;
                 index.Entity = item.Entity;
                 index.CompanyId = id;
                 index.ConfigScreenFields = new List<ConfigScreenField>();

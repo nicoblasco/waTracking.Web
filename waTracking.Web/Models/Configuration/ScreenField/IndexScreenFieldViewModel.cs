@@ -13,7 +13,6 @@ namespace waTracking.Web.Models.Configuration.ScreenField
         public string Entity { get; set; }
 
         public int CompanyId { get; set; }
-        public virtual Company Company { get; set; }
 
 
 

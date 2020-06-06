@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
+using waTracking.Entities.Configuration;
 using waTracking.Entities.Security;
 
-namespace waTracking.Entities.Configuration
+namespace waTracking.Web.Models.Configuration.Company
 {
-    public class Company
+    public class CreateCompanyViewModel
     {
-        public int Id { get; set; }
         public string Name { get; set; }
 
         public string ContactName { get; set; }
         public string ContactLastName { get; set; }
-        public DateTime CreationDate { get; set; }
-        public bool Enabled { get; set; }
         public DateTime? InitialDate { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
@@ -26,12 +25,15 @@ namespace waTracking.Entities.Configuration
         public string Country { get; set; }
         public string Schedule { get; set; }
         public string Logo { get; set; }
+        public string LogoName { get; set; }
         public string Comment { get; set; }
 
-        public ICollection<CompanySector> CompanySectors { get; set; }
+        public List<CompanySector> CompanySectors { get; set; }
+        public List<ConfigScreen> ConfigScreens { get; set; }
 
-        public ICollection<SecurityUser> Usuarios { get; set; }
-        public ICollection<ConfigScreen> ConfigScreen { get; set; }
-        public ICollection<SecurityRole> SecurityRoles { get; set; }
+        public List<RoleCompanyViewModel> SecurityRoles { get; set; }
+
+
+
     }
 }

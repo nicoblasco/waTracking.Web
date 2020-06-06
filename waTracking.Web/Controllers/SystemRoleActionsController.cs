@@ -30,7 +30,6 @@ namespace waTracking.Web.Controllers
         {
             List<SystemAction> listactions = _context.SystemAction.Where(x=>x.Enabled==true).ToList();
             List<SystemRole> listroles = _context.SystemRole.ToList();
-            List<SystemScreen> listscreens = _context.SystemScreen.ToList();
             List<SystemRoleAction> listroleaction = _context.SystemRoleAction.ToList();
             
             List<RoleActionViewModel> listvm = new List<RoleActionViewModel>();
