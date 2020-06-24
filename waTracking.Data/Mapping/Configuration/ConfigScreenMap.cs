@@ -14,6 +14,7 @@ namespace waTracking.Data.Mapping.Configuration
             builder.ToTable("ConfigScreen")
             .HasKey(c => c.Id);
 
+
             //builder.HasMany(a => a.ConfigScreenFields)
             //       .WithOne(e=>e.ConfigScreen)
             //       .HasForeignKey<ConfigScreenField>(b => b.ConfigScreen);

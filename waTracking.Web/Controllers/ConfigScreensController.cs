@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using waTracking.Data;
 using waTracking.Entities.Configuration;
+using waTracking.Entities.System;
+using waTracking.Web.Models.Configuration.Screen;
 using waTracking.Web.Models.Configuration.ScreenField;
+using waTracking.Web.Models.Security.Action;
 
 namespace waTracking.Web.Controllers
 {
@@ -78,6 +81,196 @@ namespace waTracking.Web.Controllers
             return Ok(listIndex);
         }
 
+
+
+        // GET: api/ConfigScreens/GetConfigScreenByCompany/5
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetConfigSystemScreenByCompany([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            List<ConfigScreenViewModel> listIndex = new List<ConfigScreenViewModel>();
+
+            //Busco en el maestro de Pantallas (SystemScreen), y traigo todas las pantallas
+            //Las pantallas que estan en ConfigScreen las sobreescribo
+
+            List<SystemScreen>  listSystemScreen = await _context.SystemScreen.Include(x=>x.SystemActions).Include(x=>x.SystemScreenFields).ToListAsync();
+            List<ConfigScreen>  listConfigScreens = await _context.ConfigScreens.Include(x=>x.SecurityActions).Include(x => x.ConfigScreenFields).Where(x => x.CompanyId == id).ToListAsync();
+
+            foreach (var item in listSystemScreen)
+            {
+                var configScreen = listConfigScreens.Where(x => x.SystemScreenId == item.Id).FirstOrDefault();
+                ConfigScreenViewModel model;
+
+                //Si la pantalla ya esta dada de alta
+                if (configScreen!=null)
+                {
+                    model = new ConfigScreenViewModel
+                    {
+                        Id = item.Id,
+                        CompanyId = id,
+                        Description = configScreen.Description,
+                        Enabled = configScreen.Enabled,
+                        Icon = configScreen.Icon,
+                        Orden = configScreen.Orden,
+                        SystemScreenId = configScreen.Id,
+                        IsDefault = true,
+                        IsNew = false,
+                        IsRemoved = false,
+                        ParentId = item.ParentId,
+                        Path = item.Path,
+                        ConfigScreenFields = new List<ConfigScreenFieldViewModel>(),
+                        SecurityActions = new List<SecurityActionViewModel>()
+
+                    };
+                    
+                }
+                else
+                {
+                     model = new ConfigScreenViewModel
+                    {
+                        CompanyId = id,
+                        Description = item.Description,
+                        Id= item.Id,
+                        Enabled = false,
+                        Icon = item.Icon,
+                        Orden = item.Orden,
+                        SystemScreenId = item.Id,
+                         IsDefault = true,
+                         IsNew = false,
+                         IsRemoved = false,
+                         ParentId = item.ParentId,
+                         Path = item.Path,
+                         ConfigScreenFields = new List<ConfigScreenFieldViewModel>(),
+                         SecurityActions = new List<SecurityActionViewModel>()
+
+                     };
+
+
+                    
+                }
+                //Por cada pantalla, me fijo si esa pantalla tiene atributos
+                    //Si tiene atributos en el maestro o en la empresa
+                if (item.SystemScreenFields!=null)
+                {
+                    //Si la pantalla tiene atributos en el maestro
+                    foreach (var sysfield in item.SystemScreenFields)
+                    {
+                        ConfigScreenFieldViewModel configScreenFieldView;
+                        //Me fijo si ese atributo esta en el de configuracion
+                        var configScreenFields = configScreen?.ConfigScreenFields?.Where(x => x.SystemScreenFieldId == sysfield.Id).FirstOrDefault();
+                        //Si ya esta cargado
+                        if (configScreenFields != null)
+                        {
+                            configScreenFieldView = new ConfigScreenFieldViewModel
+                            {
+                                Id = sysfield.Id,
+                                DefaultValue = configScreenFields.DefaultValue,
+                                Enabled = configScreenFields.Enabled,
+                                FieldName = configScreenFields.FieldName,
+                                Name = configScreenFields.Name,
+                                Required = sysfield.Required,
+                                SystemScreenId = item.Id,
+                                Visible = sysfield.Visible,
+                                IsNew=false,
+                                IsRemoved=false
+
+
+                            };
+
+                        }
+
+                        else
+                        {
+                            configScreenFieldView = new ConfigScreenFieldViewModel
+                            {
+                                Id = sysfield.Id,
+                                DefaultValue =  sysfield.DefaultValue,
+                                Enabled = false,
+                                FieldName = sysfield.FieldName,
+                                Name = sysfield.Name,
+                                Required = sysfield.Required,
+                                SystemScreenId = item.Id,
+                                Visible = sysfield.Visible,
+                                IsNew = false,
+                                IsRemoved = false
+
+                            };
+                        }
+                        model.ConfigScreenFields.Add(configScreenFieldView);
+
+
+                    }
+                    
+                }
+
+
+                //Por cada pantalla, me fijo si esa pantalla tiene acciones
+                //Si tiene acciones en el maestro o en la empresa
+                if (item.SystemActions != null)
+                {
+                    //Si la pantalla tiene acciones en el maestro
+                    foreach (var sysaction in item.SystemActions)
+                    {
+                        SecurityActionViewModel securityActionViewModel;
+
+                        //Me fijo si esa accion esta en el de configuracion
+                        var securityAction = configScreen?.SecurityActions?.Where(x => x.SystemActionId == sysaction.Id).FirstOrDefault();
+                        //Si ya esta cargado
+                        if (securityAction != null)
+                        {
+                            securityActionViewModel = new SecurityActionViewModel
+                            {
+                                Id = sysaction.Id,
+                                Code = sysaction.Code,
+                                Description= securityAction.Description,
+                                Enabled= securityAction.Enabled,
+                                SystemScreenId= sysaction.SystemScreenId,                                
+                                IsNew = false,
+                                IsRemoved = false
+
+
+                            };
+
+                        }
+
+                        else
+                        {
+                            securityActionViewModel = new SecurityActionViewModel
+                            {
+                                Id = sysaction.Id,
+                                Code = sysaction.Code,
+                                Description = sysaction.Description,
+                                Enabled = sysaction.Enabled,
+                                SystemScreenId = sysaction.SystemScreenId,
+                                IsNew = false,
+                                IsRemoved = false
+
+                            };
+                        }
+                        model.SecurityActions.Add(securityActionViewModel);
+
+
+                    }
+
+                }
+
+
+                listIndex.Add(model);
+
+            }
+
+
+
+            if (listIndex == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(listIndex);
+        }
 
         // GET: api/ConfigScreens/5
         [HttpGet("{id}")]
