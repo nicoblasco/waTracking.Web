@@ -92,6 +92,9 @@ namespace waTracking.Web.Controllers
                 Country = company.Country,
                 Schedule = company.Schedule,                
                 Comment = company.Comment,
+                Address= company.Address,
+                Postal = company.Postal,
+                Website = company.Website,                
                 Sectors = company.CompanySectors.Select(x=>x.SectorId).ToList()
                 
             };
@@ -271,9 +274,9 @@ namespace waTracking.Web.Controllers
                         };
 
                         securityRole.Usuarios.Add(user);
-                        i++;
+                       
                     }
-
+                    i++;
 
 
                     securityRole.SecurityRoleScreens = new List<SecurityRoleScreen>();
@@ -311,13 +314,6 @@ namespace waTracking.Web.Controllers
 
                     company.SecurityRoles.Add(securityRole);                    
                 }
-
-
-
-
-
-
-
 
                 //Guardo el avatar
                 if (company.Id>0)
@@ -421,12 +417,16 @@ namespace waTracking.Web.Controllers
                 //Si no se dan de alta o se eliminan, los actualizo
                 //son todos los que no se graban + los que no se eliminan
                 List<ConfigScreen> screenNotbeUpdated = new List<ConfigScreen>();
+                List<ConfigScreen> screenEnabled = new List<ConfigScreen>();
                 screenNotbeUpdated.AddRange(screenToBeAdded);
                 screenNotbeUpdated.AddRange(screenToBeDeleted);
                 var screenToBeUpdated = model.ConfigScreens.Where(a => screenNotbeUpdated.All(
                     b => b.SystemScreenId != a.SystemScreenId));
 
-                //Elimino
+                screenEnabled.AddRange(screenToBeAdded);
+                screenEnabled.AddRange(screenToBeUpdated);
+
+                //Elimino las pantallas del paso 2
                 foreach (var screenDtl in screenToBeDeleted.ToList())
                 {
                     //Borro los childs
@@ -469,20 +469,58 @@ namespace waTracking.Web.Controllers
                     company.ConfigScreen.Remove(configScreen);
                 }
 
+                //Modifico
                 foreach (var screen in company.ConfigScreen)
                 {
                     ConfigScreen configScreen = screenToBeUpdated.Where(x => x.SystemScreenId == screen.SystemScreenId).FirstOrDefault();
                     if (configScreen!=null)
                     {
-                        //Modifico
+
                         screen.Description = configScreen.Description;
                         screen.Enabled = configScreen.Enabled;
                         screen.Icon = configScreen.Icon;
                         screen.Orden = configScreen.Orden;
 
                     }
+
+                    //Actualizo los fields
+                    if (configScreen.ConfigScreenFields != null) {
+                        foreach (var item1 in screen.ConfigScreenFields)
+                        {
+                            foreach (var item2 in configScreen.ConfigScreenFields)
+                            {
+                                if (item1.SystemScreenFieldId == item2.SystemScreenFieldId)
+                                {
+                                    item1.Enabled = item2.Enabled;
+                                    item1.DefaultValue = item2.DefaultValue;
+                                    item1.FieldName = item2.FieldName;
+                                    item1.Name = item2.Name;
+                                    item1.Required = item2.Required;
+                                    item2.Visible = item2.Visible;
+                                }
+                            } 
+                        }
+                    }
+
+                    //Actualizo las acciones
+                    if (configScreen.SecurityActions != null)
+                    {
+                        foreach (var item1 in screen.SecurityActions)
+                        {
+                            foreach (var item2 in configScreen.SecurityActions)
+                            {
+                                if (item1.SystemActionId == item2.SystemActionId)
+                                {
+                                    item1.Enabled = item2.Enabled;
+                                    item1.Description = item2.Description;
+                                }
+                            }
+                        }
+                    }
+
                 }
 
+                
                 //Agrego
                 foreach (var screenAdd in screenToBeAdded.ToList())
                 {
@@ -496,178 +534,136 @@ namespace waTracking.Web.Controllers
                         SystemScreenId = screenAdd.SystemScreenId
                     };
 
+                    //tambien agrego los atributos
+
+                    //Dentro de las pantallas agrego los Atributos
+                    if (screenAdd.ConfigScreenFields != null)
+                    {
+                        configScreenAdd.ConfigScreenFields = new List<ConfigScreenField>();
+                        foreach (var field in screenAdd.ConfigScreenFields)
+                        {
+
+                            ConfigScreenField configScreenField = new ConfigScreenField
+                            {
+                                ConfigScreenId = screenAdd.Id,
+                                Name = field.Name,
+                                Required = field.Required,
+                                Visible = field.Visible,
+                                DefaultValue = field.DefaultValue,
+                                Enabled = field.Enabled,
+                                FieldName = field.FieldName,
+                                SystemScreenFieldId = field.SystemScreenFieldId,
+
+                            };
+                            screenAdd.ConfigScreenFields.Add(configScreenField);
+                        }
+                    }
+
+                    //Dentro de las pantallas agrego las Acciones
+                    if (screenAdd.SecurityActions != null)
+                    {
+                        configScreenAdd.SecurityActions = new List<SecurityAction>();
+                        foreach (var action in screenAdd.SecurityActions)
+                        {
+                            SecurityAction securityAction = new SecurityAction
+                            {
+                                ConfigScreenId = screenAdd.Id,
+                                Description = action.Description,
+                                Enabled = action.Enabled,
+                                SystemActionId = action.SystemActionId,
+
+
+                            };
+                            configScreenAdd.SecurityActions.Add(securityAction);
+                        }
+                    }
+
+
+
                     company.ConfigScreen.Add(configScreenAdd);
+                }
+
+                //SecurityRoles
+                //Vienen todos los roles               
+                foreach  (var modelRol in model.SecurityRoles.ToList())
+                {
+                    //Paso 5
+                    SecurityRole securityRole = company.SecurityRoles.Where(x => x.SystemRoleId == modelRol.SystemRoleId).FirstOrDefault();
+
+                    if (securityRole != null)
+                    {
+                        securityRole.Description = modelRol.Description;
+                        securityRole.Name = modelRol.Name;
+                        securityRole.Enabled = modelRol.Enabled;
+
+                        var screenRolToBeAdded = modelRol.SecurityRoleScreens.Where(a => securityRole.SecurityRoleScreens.All(
+                        b => b.ConfigScreen.SystemScreenId != a.SystemScreenId));
+
+                        var screenRolToBeDeleted = securityRole.SecurityRoleScreens.Where(a => modelRol.SecurityRoleScreens.All(
+                              b => b.SystemScreenId != a.ConfigScreen.SystemScreenId));
+
+                        var actionRolToBeAdded = modelRol.SecurityRoleActions.Where(a => securityRole.SecurityRoleActions.All(
+                            b => b.SecurityAction.SystemActionId != a.SystemActionId));
+
+                        var actionRolToBeDeleted = securityRole.SecurityRoleActions.Where(a => modelRol.SecurityRoleActions.All(
+                              b => b.SystemActionId != a.SecurityAction.SystemActionId));
+
+                        //SCREENS
+                        foreach (var item in screenRolToBeDeleted.ToList())
+                        {
+                            securityRole.SecurityRoleScreens.Remove(item);
+                        }
+
+                        foreach (var item2 in screenRolToBeAdded.ToList())
+                        {
+
+                            SecurityRoleScreen securityRoleScreen = new SecurityRoleScreen
+                            {
+                                SecurityRoleId = item2.SystemRoleId,
+                                ConfigScreenId = company.ConfigScreen.Where(x => x.SystemScreenId == item2.SystemScreenId).Select(x => x.Id).FirstOrDefault()
+                            };
+
+                            securityRole.SecurityRoleScreens.Add(securityRoleScreen);
+                        }
+
+                        //ACCIONES
+                        foreach (var item in actionRolToBeDeleted.ToList())
+                        {
+                            securityRole.SecurityRoleActions.Remove(item);
+                        }
+
+                        foreach (var item2 in actionRolToBeAdded.ToList())
+                        {                           
+
+                            var configScreen = company.ConfigScreen.Where(x => x.SystemScreenId == item2.SystemScreenId).FirstOrDefault();
+                            if (configScreen != null)
+                            {
+
+
+                                foreach (var action in configScreen.SecurityActions)
+                                {
+                                    if (item2.SystemActionId == action.SystemActionId)
+                                    {
+                                        SecurityRoleAction securityRoleAction = new SecurityRoleAction
+                                        {
+                                            SecurityRoleId = item2.SystemRoleId
+                                        };
+                                        securityRoleAction.SecurityActionId = action.Id;
+                                        securityRole.SecurityRoleActions.Add(securityRoleAction);
+                                        break;
+                                    }
+                                }
+
+
+                            }
+
+                        }
+                    }                                                                        
                 }
 
 
                 _context.Entry(company).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-
-
-
-                ////Pantallas
-                //if (model.ConfigScreens != null)
-                //{
-                //    company.ConfigScreen = new List<ConfigScreen>();
-                //    foreach (var item in model.ConfigScreens)
-                //    {
-                //        ConfigScreen configScreen = new ConfigScreen
-                //        {
-                //            CompanyId = company.Id,
-                //            Description = item.Description,
-                //            Enabled = item.Enabled,
-                //            Orden = item.Orden,
-                //            Icon = item.Icon,
-                //            SystemScreenId = item.SystemScreenId
-                //        };
-
-                //        //Dentro de las pantallas agrego los Atributos
-                //        if (item.ConfigScreenFields != null)
-                //        {
-                //            configScreen.ConfigScreenFields = new List<ConfigScreenField>();
-                //            foreach (var field in item.ConfigScreenFields)
-                //            {
-
-                //                ConfigScreenField configScreenField = new ConfigScreenField
-                //                {
-                //                    ConfigScreenId = item.Id,
-                //                    Name = field.Name,
-                //                    Required = field.Required,
-                //                    Visible = field.Visible,
-                //                    DefaultValue = field.DefaultValue,
-                //                    Enabled = field.Enabled,
-                //                    FieldName = field.FieldName,
-                //                    SystemScreenFieldId = field.SystemScreenFieldId,
-
-                //                };
-                //                configScreen.ConfigScreenFields.Add(configScreenField);
-                //            }
-                //        }
-
-                //        //Dentro de las pantallas agrego las Acciones
-                //        if (item.SecurityActions != null)
-                //        {
-                //            configScreen.SecurityActions = new List<SecurityAction>();
-                //            foreach (var action in item.SecurityActions)
-                //            {
-                //                SecurityAction securityAction = new SecurityAction
-                //                {
-                //                    ConfigScreenId = item.Id,
-                //                    Description = action.Description,
-                //                    Enabled = action.Enabled,
-                //                    SystemActionId = action.SystemActionId,
-
-
-                //                };
-                //                configScreen.SecurityActions.Add(securityAction);
-                //            }
-                //        }
-
-                //        company.ConfigScreen.Add(configScreen);
-
-                //    }
-                //}
-
-
-
-                //_context.Companies.Add(company);
-                //await _context.SaveChangesAsync();
-
-
-
-
-                ////Agrego los roles
-                //////Agrego las pantallas que aplican para ese rol
-                //company.SecurityRoles = new List<SecurityRole>();
-
-                //foreach (var rol in model.SecurityRoles)
-                //{
-
-                //    int i = 0;
-                //    SecurityRole securityRole = new SecurityRole
-                //    {
-                //        Name = rol.Name,
-                //        CompanyId = company.Id,
-                //        Description = rol.Description,
-                //        Enabled = true,
-                //        SystemRoleId = rol.SystemRoleId
-
-                //    };
-
-
-                //    if (i == 0)
-                //    {
-                //        //Genero el usuario
-                //        securityRole.Usuarios = new List<SecurityUser>();
-
-
-                //        CrearPasswordHash(userPassword, out byte[] passwordHash, out byte[] passwordSalt);
-
-                //        SecurityUser user = new SecurityUser
-                //        {
-                //            CompanyId = company.Id,
-                //            Condicion = true,
-                //            Direccion = company.Address,
-                //            Email = company.Email,
-                //            Nombre = company.Name,
-                //            SecurityRoleId = securityRole.Id,
-                //            Password_hash = passwordHash,
-                //            Password_salt = passwordSalt
-                //        };
-
-                //        securityRole.Usuarios.Add(user);
-                //        i++;
-                //    }
-
-
-
-                //    securityRole.SecurityRoleScreens = new List<SecurityRoleScreen>();
-                //    securityRole.SecurityRoleActions = new List<SecurityRoleAction>();
-                //    foreach (var screen in company.ConfigScreen)
-                //    {
-                //        //Si la pantalla esta en el rol, la agrego
-                //        if (rol.SecurityRoleScreens.Where(x => x.SystemScreenId == screen.SystemScreenId).Any())
-                //        {
-                //            SecurityRoleScreen securityRoleScreen = new SecurityRoleScreen
-                //            {
-                //                ConfigScreenId = screen.Id,
-                //                SecurityRoleId = securityRole.Id
-                //            };
-                //            securityRole.SecurityRoleScreens.Add(securityRoleScreen);
-
-
-                //            foreach (var action in screen.SecurityActions)
-                //            {
-                //                if (rol.SecurityRoleActions.Where(x => x.SystemActionId == action.SystemActionId).Any())
-                //                {
-                //                    SecurityRoleAction securityRoleAction = new SecurityRoleAction
-                //                    {
-                //                        SecurityActionId = action.Id,
-                //                        SecurityRoleId = securityRole.Id
-                //                    };
-                //                    securityRole.SecurityRoleActions.Add(securityRoleAction);
-
-                //                }
-                //            }
-                //        }
-
-                //    }
-
-
-                //    company.SecurityRoles.Add(securityRole);
-                //}
-
-
-
-
-
-
-
-
-
-                 
-
-
 
             }
             catch (Exception ex)
