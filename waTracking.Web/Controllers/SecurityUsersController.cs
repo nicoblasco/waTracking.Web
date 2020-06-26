@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using waTracking.Data;
+using waTracking.Entities.Configuration;
 using waTracking.Entities.Security;
+using waTracking.Web.Models.Security.Role;
+using waTracking.Web.Models.Security.RoleAction;
+using waTracking.Web.Models.Security.RoleScreen;
+using waTracking.Web.Models.Security.ScreenField;
 using waTracking.Web.Models.Security.User;
 
 namespace waTracking.Web.Controllers
@@ -52,6 +58,101 @@ namespace waTracking.Web.Controllers
             }
 
             return Ok(user);
+        }
+
+
+        // GET: api/SecurityUsers/GetConfiguration/5
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetConfiguration([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            SecurityUser user = await _context.SecurityUsers.Where(x => x.Id == id).Include(x=>x.Rol).ThenInclude(y=>y.SecurityRoleActions).ThenInclude(y => y.SecurityAction).ThenInclude(y => y.SystemAction).Include(x=>x.Rol).ThenInclude(z=>z.SecurityRoleScreens).ThenInclude(z => z.ConfigScreen).ThenInclude(h => h.SystemScreen).Include(x => x.Rol).ThenInclude(z => z.SecurityRoleScreens).ThenInclude(z => z.ConfigScreen).ThenInclude(h => h.ConfigScreenFields).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            UserConfigurationViewModel viewModel = new UserConfigurationViewModel
+            {
+                Id = user.Id,
+                Nombre= user.Nombre,
+                SecurityRoleId = user.SecurityRoleId                
+            };
+
+            //ROL
+
+            SecurityRoleConfigurationViewModel rol = new SecurityRoleConfigurationViewModel
+            {
+                Id = user.Rol.Id,
+                Description = user.Rol.Description,
+                Name = user.Rol.Name,
+                Screens = new List<SecurityRoleScreenConfViewModel>()
+            };
+
+            //Screens
+            if (user.Rol.SecurityRoleScreens!=null)
+            {
+                foreach (var item in user.Rol.SecurityRoleScreens)
+                {
+                    ConfigScreen configScreen = item.ConfigScreen;
+                    SecurityRoleScreenConfViewModel screen = new SecurityRoleScreenConfViewModel
+                    {
+                        Description= configScreen.Description,
+                        Enabled = configScreen.Enabled,
+                        Icon = configScreen.Icon,
+                        Id= configScreen.Id,
+                        Orden = configScreen.Orden,
+                        ParentId= configScreen.SystemScreen.ParentId,
+                        Path = configScreen.SystemScreen.Path,
+                        SystemScreenId = configScreen.SystemScreenId,
+                        Actions = new List<SecurityRoleActionConfViewModel>(),
+                        Fields = new List<ScreenFieldConfViewModel>()
+                    };
+
+                    foreach (var fields in configScreen.ConfigScreenFields)
+                    {
+                        ScreenFieldConfViewModel screenField = new ScreenFieldConfViewModel
+                        {
+                            DefaultValue =fields.DefaultValue,
+                            Enabled = fields.Enabled,
+                            FieldName = fields.FieldName,
+                            Id = fields.Id,
+                            Name= fields.Name,
+                            Required=fields.Required,
+                            Visible = fields.Visible
+                        };
+                        screen.Fields.Add(screenField);
+                    }
+
+                    foreach (var action in user.Rol.SecurityRoleActions)
+                    {
+                        if (action.SecurityAction.ConfigScreenId == screen.Id)
+                        {
+                            if (action.SecurityAction.Enabled) {
+                                SecurityRoleActionConfViewModel actionVm = new SecurityRoleActionConfViewModel
+                                {
+                                    Id = action.SecurityActionId,
+                                    Code = action.SecurityAction.SystemAction.Code,
+                                    Description = action.SecurityAction.Description
+                                };
+                                screen.Actions.Add(actionVm);
+                            }
+
+                        }
+                    }
+                    rol.Screens.Add(screen);
+                }
+            }
+
+            viewModel.Role = rol;
+
+
+            return Ok(viewModel);
         }
 
         // GET: api/SecurityUser/Listar
@@ -268,7 +369,7 @@ namespace waTracking.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             var email = model.Email.ToLower();
-            var usuario = await _context.SecurityUsers.Where(x => x.Condicion == true).Include(x => x.Rol).FirstOrDefaultAsync(x => x.Email == email);
+            var usuario = await _context.SecurityUsers.Where(x => x.Condicion == true).Include(x => x.Rol).Include(x=>x.Company).FirstOrDefaultAsync(x => x.Email == email);
 
             if (usuario == null)
             {
@@ -283,15 +384,16 @@ namespace waTracking.Web.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Email,email),
+                //new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                //new Claim(ClaimTypes.Email,email),
                 new Claim(ClaimTypes.Role ,usuario.Rol.Name),
-                new Claim(ClaimTypes.Name ,usuario.Nombre),
+                //new Claim(ClaimTypes.Name ,usuario.Nombre),
                // new Claim(ClaimTypes.UserData ,usuario.CompanyId.ToString()),
-                //new Claim("Id", usuario.Id.ToString()),
-                new Claim("Rol",usuario.SecurityRoleId.ToString()),
-                //new Claim("Nombre",usuario.Nombre),
-                new Claim("CompanyId",usuario.CompanyId.ToString())
+                new Claim("Id", usuario.Id.ToString()),
+                new Claim("RolId",usuario.SecurityRoleId.ToString()),
+                new Claim("Nombre",usuario.Nombre),
+                new Claim("CompanyId",usuario.CompanyId.ToString()),
+                new Claim("Avatar",usuario.Company.Logo),
 
             };
 

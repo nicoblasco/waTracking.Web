@@ -43,6 +43,7 @@ namespace waTracking.Web.Controllers
             });
         }
 
+
         // GET: api/SecurityRoles/GetByCompany/5
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetByCompany([FromRoute] int id)
