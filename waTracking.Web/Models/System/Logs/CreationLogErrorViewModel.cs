@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace waTracking.Entities.System
+namespace waTracking.Web.Models.System.Logs
 {
-    public class LogError
+    public class CreationLogErrorViewModel
     {
-        public Int64 Id { get; set; }
         public int CompanyId { get; set; }
         public int SecurityUserId { get; set; }
         public string Path { get; set; }
         public string Error { get; set; }
-        public DateTime CreationDate { get; set; }
     }
 }

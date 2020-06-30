@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using waTracking.Data;
 using waTracking.Entities.System;
+using waTracking.Web.Helpers;
+using waTracking.Web.Models.System.Logs;
 
 namespace waTracking.Web.Controllers
 {
@@ -22,18 +24,35 @@ namespace waTracking.Web.Controllers
             _context = context;
         }
 
-        public  void LogError(string controller, string method, string error, string comment = null)
+        // POST: api/LogErrors/Create
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Create([FromBody] CreationLogErrorViewModel model)
         {
-            LogError log = new LogError
+            try
             {
-                Controller = controller,
-                Method= method,
-                Comment= comment,
-                Error= error
-            };
+                LogError log = new LogError
+                {
+                    CompanyId= model.CompanyId,
+                    CreationDate= DateTime.Now,
+                    Path = model.Path,
+                    SecurityUserId= model.SecurityUserId,
+                    Error= StringExt.Truncate(model.Error,7999)
+                };
 
-            _context.LogErrors.Add(log);
-             _context.SaveChangesAsync();
+                _context.LogErrors.Add(log);
+
+                await _context.SaveChangesAsync();
+                return Ok(log.Id);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest();
+            }
+
+            
         }
+
+
     }
 }
