@@ -8,5 +8,6 @@ namespace waTracking.Web.Models.Vehicle.TypeOfUse
     public class CreateTypeOfUseViewModel
     {
         public string Description { get; set; }
+        public int CompanyId { get; set; }
     }
 }

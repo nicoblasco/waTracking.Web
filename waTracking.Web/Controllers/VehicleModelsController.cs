@@ -23,10 +23,27 @@ namespace waTracking.Web.Controllers
         }
 
         // GET: api/VehicleModels
-        [HttpGet]
-        public IEnumerable<VehicleModel> GetVehicleModels()
+        [HttpGet("{companyId}")]
+        public IEnumerable<IndexVehicleModelViewModel> GetVehicleModels([FromRoute] int companyId)
         {
-            return _context.VehicleModels.Where(x => x.Enabled == true); 
+
+            List<VehicleModel> vehicleModels = _context.VehicleModels.Where(x => x.Enabled == true && x.VehicleBrand.CompanyId== companyId).Include(x => x.VehicleBrand).ToList();
+            List<IndexVehicleModelViewModel> list = new List<IndexVehicleModelViewModel>();
+            foreach (var item in vehicleModels)
+            {
+                IndexVehicleModelViewModel indexVehicleModelView = new IndexVehicleModelViewModel
+                {
+                    VehicleBrandId = item.VehicleBrandId,
+                    Brand = item.VehicleBrand?.Description,
+                    Description = item.Description,
+                    Enabled = item.Enabled,
+                    Id = item.Id
+
+                };
+                list.Add(indexVehicleModelView);
+            }
+
+            return list;
         }
 
         // GET: api/VehicleModels/5
@@ -38,14 +55,24 @@ namespace waTracking.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            var vehicleModel = await _context.VehicleModels.FindAsync(id);
+            var vehicleModel = await _context.VehicleModels.Where(x => x.Id == id).Include(x => x.VehicleBrand).FirstOrDefaultAsync();
+            IndexVehicleModelViewModel indexVehicleModelView = new IndexVehicleModelViewModel
+            {
+                VehicleBrandId = vehicleModel.VehicleBrandId,
+                Brand = vehicleModel.VehicleBrand?.Description,
+                Description= vehicleModel.Description,
+                Enabled = vehicleModel.Enabled,
+                Id = vehicleModel.Id
+
+            };
+
 
             if (vehicleModel == null)
             {
                 return NotFound();
             }
 
-            return Ok(vehicleModel);
+            return Ok(indexVehicleModelView);
         }
 
         // PUT: api/VehicleModels/Create
@@ -61,7 +88,7 @@ namespace waTracking.Web.Controllers
             {
                 Description = model.Description,
                 Enabled = true,
-                VehicleBrandId= model.VehicleBrandId
+                VehicleBrandId= model.VehicleBrandId                
             };
 
 

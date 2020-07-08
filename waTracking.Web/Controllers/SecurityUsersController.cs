@@ -392,8 +392,8 @@ namespace waTracking.Web.Controllers
                 new Claim("Id", usuario.Id.ToString()),
                 new Claim("RolId",usuario.SecurityRoleId.ToString()),
                 new Claim("Nombre",usuario.Nombre),
-                new Claim("CompanyId",usuario.CompanyId.ToString()),
-                new Claim("Avatar",usuario.Company.Logo),
+                new Claim("CompanyId",usuario.CompanyId.ToString())//,
+                //new Claim("Avatar",usuario.Company.Logo??null),
 
             };
 

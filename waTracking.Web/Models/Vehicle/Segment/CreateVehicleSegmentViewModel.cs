@@ -8,5 +8,6 @@ namespace waTracking.Web.Models.Vehicle.Segment
     public class CreateVehicleSegmentViewModel
     {
         public string Description { get; set; }
+        public int CompanyId { get; set; }
     }
 }

@@ -485,10 +485,13 @@ namespace waTracking.Web.Controllers
 
                     //Actualizo los fields
                     if (configScreen.ConfigScreenFields != null) {
-                        foreach (var item1 in screen.ConfigScreenFields)
-                        {
-                            foreach (var item2 in configScreen.ConfigScreenFields)
+
+                       foreach (var item2 in configScreen.ConfigScreenFields)
+                       {
+                            bool existField = false;
+                            foreach (var item1 in screen.ConfigScreenFields)
                             {
+                                //Me fijo si esta creado, si esta lo actualizo
                                 if (item1.SystemScreenFieldId == item2.SystemScreenFieldId)
                                 {
                                     item1.Enabled = item2.Enabled;
@@ -497,23 +500,61 @@ namespace waTracking.Web.Controllers
                                     item1.Name = item2.Name;
                                     item1.Required = item2.Required;
                                     item2.Visible = item2.Visible;
+                                    existField = true;
+                                    break;
                                 }
-                            } 
-                        }
+                            }
+
+                            //Sino existe lo creo
+                            if (!existField)
+                            {
+                                ConfigScreenField configScreenField = new ConfigScreenField
+                                {
+                                    Enabled = item2.Enabled,
+                                    DefaultValue = item2.DefaultValue,
+                                    FieldName = item2.FieldName,
+                                    Name = item2.Name,
+                                    Required = item2.Required,
+                                    Visible = item2.Visible,
+                                    ConfigScreenId= item2.ConfigScreenId,
+                                    SystemScreenFieldId = item2.SystemScreenFieldId
+                                };
+                                screen.ConfigScreenFields.Add(configScreenField);
+                            }
+                       } 
+                        
                     }
 
                     //Actualizo las acciones
                     if (configScreen.SecurityActions != null)
                     {
-                        foreach (var item1 in screen.SecurityActions)
+                        
+                        foreach (var item2 in configScreen.SecurityActions)
                         {
-                            foreach (var item2 in configScreen.SecurityActions)
+                            bool existAction = false;
+                            foreach (var item1 in screen.SecurityActions)
                             {
+
                                 if (item1.SystemActionId == item2.SystemActionId)
                                 {
                                     item1.Enabled = item2.Enabled;
                                     item1.Description = item2.Description;
+                                    existAction = true;
+                                    break;
                                 }
+                            }
+
+                            //Sino existe lo creo
+                            if (!existAction)
+                            {
+                                SecurityAction securityAction = new SecurityAction
+                                {
+                                    Enabled = item2.Enabled,
+                                    Description = item2.Description,
+                                    ConfigScreenId = item2.ConfigScreenId,
+                                    SystemActionId = item2.SystemActionId
+                                };
+                                screen.SecurityActions.Add(securityAction);
                             }
                         }
                     }
@@ -581,11 +622,16 @@ namespace waTracking.Web.Controllers
 
 
                     company.ConfigScreen.Add(configScreenAdd);
-                }
+                }                
+
+
+                _context.Entry(company).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
 
                 //SecurityRoles
                 //Vienen todos los roles               
-                foreach  (var modelRol in model.SecurityRoles.ToList())
+                foreach (var modelRol in model.SecurityRoles.ToList())
                 {
                     //Paso 5
                     SecurityRole securityRole = company.SecurityRoles.Where(x => x.SystemRoleId == modelRol.SystemRoleId).FirstOrDefault();
@@ -633,7 +679,7 @@ namespace waTracking.Web.Controllers
                         }
 
                         foreach (var item2 in actionRolToBeAdded.ToList())
-                        {                           
+                        {
 
                             var configScreen = company.ConfigScreen.Where(x => x.SystemScreenId == item2.SystemScreenId).FirstOrDefault();
                             if (configScreen != null)
@@ -658,10 +704,8 @@ namespace waTracking.Web.Controllers
                             }
 
                         }
-                    }                                                                        
+                    }
                 }
-
-
                 _context.Entry(company).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 

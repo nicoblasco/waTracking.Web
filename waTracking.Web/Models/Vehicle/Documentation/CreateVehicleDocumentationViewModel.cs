@@ -8,5 +8,6 @@ namespace waTracking.Web.Models.Vehicle.Documentation
     public class CreateVehicleDocumentationViewModel
     {
         public string Description { get; set; }
+        public int CompanyId { get; set; }
     }
 }

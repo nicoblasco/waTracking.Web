@@ -44,7 +44,7 @@ namespace waTracking.Web.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(log.Id);
             }
-            catch (Exception ex)
+            catch 
             {
 
                 return BadRequest();

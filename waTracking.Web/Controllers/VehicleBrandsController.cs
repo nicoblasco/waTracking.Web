@@ -25,10 +25,10 @@ namespace waTracking.Web.Controllers
         }
 
         // GET: api/VehicleBrands
-        [HttpGet]
-        public IEnumerable<VehicleBrand> GetVehicleBrands()
+        [HttpGet("{companyId}")]
+        public IEnumerable<VehicleBrand> GetVehicleBrands([FromRoute] int companyId)
         {
-            return _context.VehicleBrands.Where(x => x.Enabled == true);
+            return _context.VehicleBrands.Where(x => x.Enabled == true && x.CompanyId==companyId);
         }
 
         // GET: api/VehicleBrands/5
@@ -41,6 +41,8 @@ namespace waTracking.Web.Controllers
             }
 
             var vehicleBrand = await _context.VehicleBrands.FindAsync(id);
+
+    
 
             if (vehicleBrand == null)
             {
@@ -61,6 +63,7 @@ namespace waTracking.Web.Controllers
 
             VehicleBrand vehicleBrand = new VehicleBrand { 
              Description = model.Description,
+             CompanyId = model.CompanyId,
              Enabled = true
             };
 
